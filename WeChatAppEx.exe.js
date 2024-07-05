@@ -4,33 +4,43 @@ const cmdline = require('cmdline-windows');
 const fs = require('fs');
 const path = require('path');
 
+
 async function run() {
-    let WeChatv = (process.argv[2]);
-    
+    // let WeChatv = (process.argv[2]);
+    const args=process.argv.slice(2);
     var device = await frida.getLocalDevice();
     var processes = await device.enumerateProcesses();
     var pid = -1;
     var version = "";
-    processes.forEach(async (p_) => {
-        if (p_.name == "WeChatAppEx.exe") {
-            let commandLine = cmdline.getCmdline(p_.pid);
-            if (commandLine.indexOf("--type=") == -1) {
-                try {
-                    if(!WeChatv){
-                        version = commandLine.split(`--wmpf_extra_config=\"{`)[1].split("}\"")[0];
-                        version = version.replaceAll(`\\"`, '"');
-                        version =  JSON.parse(`{${version}}`)
-                        version =  version.version;
-                    }else{
-                        version = WeChatv;
-                    }
-                    pid = p_.pid;
-                } catch {
-                }
-            }
-        }
-    });
-    
+
+    version = Number(args[0]);
+    pid=Number(args[1]);
+    console.log(args);
+    processes.forEach(p_=>{
+        console.log(p_.name,p_.pid)
+    })
+    // processes.forEach(async (p_) => { 
+    //     if (p_.name == "WeChatAppEx.exe") {
+    //         let commandLine = cmdline.getCmdline(p_.pid);
+    //         if (commandLine.indexOf("--type=") == -1) {
+    //             try {
+    //                 if(!WeChatv){
+    //                     version = commandLine.split(`--wmpf_extra_config=\"{`)[1].split("}\"")[0];
+    //                     version = version.replaceAll(`\\"`, '"');
+    //                     version =  JSON.parse(`{${version}}`)
+    //                     version =  version.version;
+    //                     console.log(version)
+                        
+    //                 }else{
+    //                     version = WeChatv;
+    //                 }
+    //                 pid = p_.pid;
+    //                 console.log(pid)
+    //             } catch {
+    //             }
+    //         }
+    //     }
+    // });
     let addressFilePath = path.join(__dirname, `/Core/WeChatAppEx.exe/address_${version}_x64.json`);
     let addressSource = `var version = ${version};`;
     
